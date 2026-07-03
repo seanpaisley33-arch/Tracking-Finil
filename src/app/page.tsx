@@ -202,14 +202,10 @@ export default function Home() {
               </ul>
             </FadeIn>
             <FadeIn direction="left" className="flex-1 w-full relative">
-              <div className="aspect-square md:aspect-[4/3] rounded-3xl shadow-2xl flex items-center justify-center overflow-hidden relative group">
-                 {/* HD Photo of secure logistics */}
-                 <img src="https://images.unsplash.com/photo-1586528116311-ad8ed7c50a1e?q=80&w=2070&auto=format&fit=crop" alt="Secure Logistics Facility" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
-                 {/* Dark overlay for contrast */}
-                 <div className="absolute inset-0 bg-blue-900/30 mix-blend-multiply"></div>
-                 {/* Animated Icon Overlay */}
-                 <motion.div style={{ y: shieldY }} className="relative z-10 bg-white/10 backdrop-blur-md p-6 rounded-full border border-white/20 shadow-2xl">
-                   <ShieldCheck className="h-20 w-20 text-white drop-shadow-lg" />
+              <div className="aspect-square md:aspect-[4/3] bg-gradient-to-tr from-slate-100 to-slate-200 rounded-3xl border border-slate-200 shadow-inner flex items-center justify-center overflow-hidden relative">
+                 <div className="absolute inset-0 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:20px_20px] opacity-30"></div>
+                 <motion.div style={{ y: shieldY }}>
+                   <ShieldCheck className="h-48 w-48 text-slate-400 relative z-10" />
                  </motion.div>
               </div>
             </FadeIn>
@@ -230,26 +226,83 @@ export default function Home() {
               </ul>
             </FadeIn>
             <FadeIn direction="right" className="flex-1 w-full relative">
-              <div className="aspect-square md:aspect-[4/3] rounded-3xl shadow-2xl flex items-center justify-center overflow-hidden relative group">
-                 {/* HD Photo of Global Telemetry/Map */}
-                 <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop" alt="Global Data Telemetry" className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" />
-                 {/* Dark overlay for contrast */}
-                 <div className="absolute inset-0 bg-emerald-900/40 mix-blend-multiply"></div>
-                 
-                 <div className="relative z-10 flex flex-col items-center">
-                   <div className="relative">
-                     <MapPin className="h-24 w-24 text-white drop-shadow-2xl relative z-10" />
-                     <motion.div 
-                        animate={{ scale: [1, 2, 2], opacity: [0.8, 0, 0] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute inset-0 bg-emerald-400 rounded-full z-0 blur-sm" 
-                     />
-                   </div>
-                 </div>
+              <div className="aspect-square md:aspect-[4/3] bg-gradient-to-tr from-blue-50 to-indigo-50 rounded-3xl border border-blue-100 shadow-inner flex items-center justify-center overflow-hidden relative">
+                 <MapPin className="h-48 w-48 text-blue-200 relative z-10" />
+                 <motion.div 
+                    animate={{ scale: [1, 2, 2], opacity: [0.5, 0, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="absolute h-48 w-48 bg-blue-400 rounded-full z-0" 
+                 />
               </div>
             </FadeIn>
           </div>
 
+        </div>
+      </section>
+
+      {/* NEW HD PHOTO GALLERY SECTION */}
+      <section className="py-24 bg-white relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <h2 className="text-4xl font-black text-slate-900 tracking-tight mb-4">Real-World Operations</h2>
+            <p className="text-xl text-slate-600">From our massive fulfillment centers directly to your doorstep. Experience the scale of our global logistics network.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <FadeIn delay={0.1} direction="up" className="group rounded-3xl overflow-hidden shadow-lg relative h-80">
+              <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?q=80&w=2070&auto=format&fit=crop" alt="USA Warehouse Operations" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="text-white font-bold text-xl mb-1">Global Warehousing</h3>
+                <p className="text-slate-300 text-sm">Millions of square feet of automated fulfillment space.</p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.2} direction="up" className="group rounded-3xl overflow-hidden shadow-lg relative h-80">
+              <img src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=80&w=2070&auto=format&fit=crop" alt="Delivery Fleet" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="text-white font-bold text-xl mb-1">Last-Mile Delivery</h3>
+                <p className="text-slate-300 text-sm">Our modern USA fleet ensures your goods arrive safely.</p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.3} direction="up" className="group rounded-3xl overflow-hidden shadow-lg relative h-80">
+              <img src="https://images.unsplash.com/photo-1565891741441-64926e441838?q=80&w=2071&auto=format&fit=crop" alt="Cargo Shipping" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="text-white font-bold text-xl mb-1">Ocean Freight</h3>
+                <p className="text-slate-300 text-sm">Heavy container freight handled with ultimate precision.</p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.4} direction="up" className="group rounded-3xl overflow-hidden shadow-lg relative h-80">
+              <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?q=80&w=2074&auto=format&fit=crop" alt="Air Freight Logistics" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="text-white font-bold text-xl mb-1">Air Cargo Transit</h3>
+                <p className="text-slate-300 text-sm">Expedited air transport for time-critical international shipments.</p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.5} direction="up" className="group rounded-3xl overflow-hidden shadow-lg relative h-80">
+              <img src="https://images.unsplash.com/photo-1587293852726-70cdb56c2866?q=80&w=2072&auto=format&fit=crop" alt="Customs Processing" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="text-white font-bold text-xl mb-1">Customs Clearance</h3>
+                <p className="text-slate-300 text-sm">Automated processing through U.S. Customs and Border Protection.</p>
+              </div>
+            </FadeIn>
+
+            <FadeIn delay={0.6} direction="up" className="group rounded-3xl overflow-hidden shadow-lg relative h-80">
+              <img src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?q=80&w=2075&auto=format&fit=crop" alt="Interstate Trucking" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
+              <div className="absolute bottom-6 left-6 right-6">
+                <h3 className="text-white font-bold text-xl mb-1">Interstate Transport</h3>
+                <p className="text-slate-300 text-sm">Coast-to-coast secure highway transport across the United States.</p>
+              </div>
+            </FadeIn>
+          </div>
         </div>
       </section>
 

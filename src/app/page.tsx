@@ -130,7 +130,7 @@ export default function Home() {
         {/* Trusted Partners Banner */}
         <FadeIn delay={1.2} className="mt-20 text-center w-full max-w-4xl opacity-70">
           <p className="text-sm font-bold text-slate-400 tracking-widest uppercase mb-6">Supported Carrier Networks</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 transition-all duration-500">
             {/* FedEx Logo */}
             <div className="flex font-black text-3xl tracking-tighter">
               <span className="text-[#4D148C]">Fed</span><span className="text-[#FF6600]">Ex</span>

@@ -182,14 +182,14 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
           {/* Subtle Background pattern in header */}
           <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
           
-          <div className="relative z-10 text-white">
-            <div className="flex items-center space-x-3 mb-2">
-              <h1 className="text-3xl md:text-4xl font-black tracking-tight drop-shadow-md">
+          <div className="relative z-10 text-white w-full md:w-auto">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4 mb-4 md:mb-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight drop-shadow-md break-all md:break-normal">
                 {shipment.tracking_number}
               </h1>
               {/* Live Indicator */}
               {shipment.current_status !== 'Delivered' && (
-                <div className="flex items-center bg-black/30 backdrop-blur-md px-3 py-1 rounded-full border border-white/10">
+                <div className="flex items-center bg-black/30 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 shrink-0">
                   <span className="relative flex h-2.5 w-2.5 mr-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
@@ -198,26 +198,26 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
                 </div>
               )}
             </div>
-            <div className="flex items-center space-x-4 text-blue-100">
-              <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-4 text-blue-100">
+              <div className="flex items-center shrink-0">
                 <CarrierLogo carrier={shipment.carrier} />
               </div>
-              <button onClick={generateReceipt} disabled={isGenerating} className="flex items-center text-sm font-medium hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/20">
+              <button onClick={generateReceipt} disabled={isGenerating} className="flex items-center text-sm font-medium hover:text-white transition-colors bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg border border-white/20 shrink-0">
                 <Download className="h-4 w-4 mr-2" />
                 {isGenerating ? 'Generating...' : 'Download Receipt'}
               </button>
             </div>
           </div>
           
-          <div className="bg-white p-5 rounded-2xl border-4 border-blue-400/30 text-right min-w-[220px] shadow-[0_0_40px_rgba(255,255,255,0.2)] relative z-10 transform hover:scale-105 transition-transform">
+          <div className="bg-white p-5 rounded-2xl border-4 border-blue-400/30 w-full md:w-auto text-center md:text-right min-w-[220px] shadow-[0_0_40px_rgba(255,255,255,0.2)] relative z-10 transform hover:scale-105 transition-transform">
             <p className="text-xs font-black text-slate-500 uppercase tracking-widest mb-1">Current Status</p>
-            <div className="flex items-center justify-end space-x-2">
+            <div className="flex items-center justify-center md:justify-end space-x-2">
               {shipment.current_status === 'Delivered' ? (
-                <CheckCircle2 className="h-7 w-7 text-emerald-500" />
+                <CheckCircle2 className="h-7 w-7 text-emerald-500 shrink-0" />
               ) : (
-                <Truck className="h-7 w-7 text-blue-600 animate-pulse" />
+                <Truck className="h-7 w-7 text-blue-600 animate-pulse shrink-0" />
               )}
-              <span className="text-2xl font-black text-slate-900 tracking-tight">{shipment.current_status}</span>
+              <span className="text-2xl sm:text-3xl md:text-2xl font-black text-slate-900 tracking-tight leading-none break-words max-w-full">{shipment.current_status}</span>
             </div>
           </div>
         </div>

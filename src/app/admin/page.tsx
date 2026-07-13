@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -10,12 +12,12 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import InvoiceTemplate from '@/components/InvoiceTemplate';
 import LocationAutocomplete, { LocationData } from '@/components/LocationAutocomplete';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomInvoiceGenerator from '@/components/admin/CustomInvoiceGenerator';
 import ReceiptControl from '@/components/admin/ReceiptControl';
 
-const AdminMiniMap = dynamic(() => import('@/components/AdminMiniMap'), {
+const AdminMiniMap = nextDynamic(() => import('@/components/AdminMiniMap'), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-slate-100 animate-pulse rounded-lg flex items-center justify-center text-slate-400">Loading map...</div>
 });

@@ -15,6 +15,23 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  if (registrations.length > 0) {
+                    Promise.all(registrations.map(r => r.unregister())).then(function() {
+                      window.location.reload();
+                    });
+                  }
+                });
+              }
+            `,
+          }}
+        />
+      </head>
       <body className={`min-h-screen flex flex-col bg-slate-50 text-slate-900 overflow-x-hidden`}>
         <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

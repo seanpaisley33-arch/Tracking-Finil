@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { Lock } from 'lucide-react';
+import { Lock, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -75,6 +76,16 @@ export default function AdminLogin() {
             {loading ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
+
+        <div className="mt-6 pt-6 border-t border-slate-100 flex justify-center">
+          <Link
+            href="/"
+            className="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-blue-600 transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   );

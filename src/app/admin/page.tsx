@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
-import { PackagePlus, UploadCloud, ListChecks, QrCode, LogOut, MapPin, Copy, FileText, Printer, Check, Stamp } from 'lucide-react';
+import { PackagePlus, UploadCloud, ListChecks, QrCode, LogOut, MapPin, Copy, FileText, Printer, Check, Stamp, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import InvoiceTemplate from '@/components/InvoiceTemplate';
@@ -78,6 +79,10 @@ export default function AdminDashboard() {
             <Stamp className="h-5 w-5" />
             <span className="text-sm md:text-base">Receipt Control</span>
           </button>
+          <Link href="/" className="flex-shrink-0 flex items-center space-x-2 md:space-x-3 px-4 py-2 md:py-3 rounded-lg font-medium text-slate-600 hover:bg-slate-50 transition-colors">
+            <ArrowLeft className="h-5 w-5" />
+            <span className="text-sm md:text-base">Back to Home</span>
+          </Link>
         </nav>
         <div className="hidden md:block p-4 border-t border-slate-200">
           <button onClick={handleLogout} className="w-full flex items-center justify-center space-x-2 text-red-600 hover:bg-red-50 py-2 rounded-lg transition-colors font-medium">

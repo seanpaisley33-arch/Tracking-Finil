@@ -12,6 +12,15 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
+  async redirects() {
+    return [
+      {
+        source: '/amin/:path*',
+        destination: '/admin/:path*',
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

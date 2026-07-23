@@ -118,7 +118,7 @@ export default function DriverSimulator() {
           {/* Status Panel */}
           {status && (
             <div className="bg-slate-900 p-4 rounded-xl border border-slate-700 text-sm text-slate-300 font-mono">
-              > {status}
+              &gt; {status}
             </div>
           )}
 

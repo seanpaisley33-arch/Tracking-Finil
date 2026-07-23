@@ -45,9 +45,10 @@ export default function RootLayout({
                 </span>
               </Link>
               <nav className="flex items-center space-x-4">
-                <Link href="/admin" className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
-                  Admin Portal
-                </Link>
+                <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-200/60 flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Live Network Active
+                </span>
               </nav>
             </div>
           </div>

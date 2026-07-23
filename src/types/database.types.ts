@@ -23,6 +23,7 @@ export type Shipment = {
   sender_name: string | null;
   sender_address: string | null;
   declared_value: number | null;
+  package_photo_url?: string | null;
 };
 
 export type ShipmentCheckpoint = {
@@ -33,5 +34,23 @@ export type ShipmentCheckpoint = {
   location_name: string | null;
   latitude: number | null;
   longitude: number | null;
+  created_at: string;
+  photo_url?: string | null;
+};
+
+export type ChatMessage = {
+  id: string;
+  shipment_id?: string | null;
+  tracking_number?: string | null;
+  sender_type: 'user' | 'admin';
+  sender_name?: string | null;
+  message_type: 'text' | 'image' | 'file' | 'voice';
+  content?: string | null;
+  file_url?: string | null;
+  file_name?: string | null;
+  file_size?: string | null;
+  voice_duration?: number | null;
+  status?: 'delivered' | 'read';
+  is_edited?: boolean;
   created_at: string;
 };

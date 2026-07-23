@@ -1,16 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { supabase } from '@/lib/supabase';
 import type { Shipment, ShipmentCheckpoint } from '@/types/database.types';
-import { Package, Truck, CheckCircle2, Clock, MapPin, AlertCircle, Download } from 'lucide-react';
+import { Package, Truck, CheckCircle2, Clock, MapPin, AlertCircle, Download, Camera, Eye, Sparkles } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import InvoiceTemplate from '@/components/InvoiceTemplate';
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import FadeIn from '@/components/animations/FadeIn';
+import ImageLightbox from '@/components/ImageLightbox';
+import LiveChatWidget from '@/components/chat/LiveChatWidget';
 
 // Helper for Carrier Logos
 const CarrierLogo = ({ carrier }: { carrier: string }) => {
@@ -37,10 +39,11 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [liveLocation, setLiveLocation] = useState<{ lat: number; lng: number } | null>(null);
-  
-  // PDF State
   const [isGenerating, setIsGenerating] = useState(false);
-  const receiptRef = React.useRef<HTMLDivElement>(null);
+  const receiptRef = useRef<HTMLDivElement>(null);
+  
+  // Lightbox State
+  const [lightboxImage, setLightboxImage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchTrackingData = async () => {
@@ -96,10 +99,14 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
         },
         (payload) => {
           console.log('New checkpoint received!', payload.new);
-          setCheckpoints((prev) => [...prev, payload.new as ShipmentCheckpoint]);
-          // Update status if provided
-          if (payload.new.status) {
-            setShipment((prev) => prev ? { ...prev, current_status: payload.new.status } : null);
+          const newCp = payload.new as ShipmentCheckpoint;
+          setCheckpoints((prev) => [...prev, newCp]);
+          if (newCp.status) {
+            setShipment((prev) => prev ? { 
+              ...prev, 
+              current_status: newCp.status,
+              ...(newCp.photo_url ? { package_photo_url: newCp.photo_url } : {}) 
+            } : null);
           }
         }
       )
@@ -145,7 +152,7 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
     return <Package className="h-6 w-6 text-slate-500" />;
   };
 
-  const sortedCheckpoints = [...checkpoints].reverse(); // Newest first for timeline
+  const sortedCheckpoints = [...checkpoints].reverse();
 
   const generateReceipt = async () => {
     if (!shipment || isGenerating) return;
@@ -179,7 +186,6 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
         
         {/* Header Summary - Deep Blue Gradient */}
         <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 rounded-2xl shadow-lg border border-blue-700 p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
-          {/* Subtle Background pattern in header */}
           <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] pointer-events-none"></div>
           
           <div className="relative z-10 text-white w-full md:w-auto">
@@ -187,7 +193,6 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight drop-shadow-md break-all md:break-normal">
                 {shipment.tracking_number}
               </h1>
-              {/* Live Indicator */}
               {shipment.current_status !== 'Delivered' && (
                 <div className="flex items-center bg-black/30 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 shrink-0">
                   <span className="relative flex h-2.5 w-2.5 mr-2">
@@ -229,7 +234,41 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
               <TrackingMap checkpoints={checkpoints} liveLocation={liveLocation} />
             </FadeIn>
 
-            {/* Advanced Package Metadata - Emerald/Blue Tint */}
+            {/* Package Current Condition & Photo Card */}
+            {(shipment.package_photo_url || sortedCheckpoints.some((cp) => cp.photo_url)) && (
+              <FadeIn delay={0.3} direction="up" className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                  <h3 className="text-lg font-bold text-slate-900 flex items-center">
+                    <Camera className="h-5 w-5 text-blue-600 mr-2" />
+                    Latest Verified Package Condition Photo
+                  </h3>
+                  <span className="text-xs font-mono font-bold bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full border border-blue-200">
+                    Live Photo Update
+                  </span>
+                </div>
+                <div
+                  onClick={() => setLightboxImage(shipment.package_photo_url || sortedCheckpoints.find((cp) => cp.photo_url)?.photo_url || null)}
+                  className="relative h-64 md:h-80 w-full rounded-xl overflow-hidden bg-slate-900 group cursor-pointer border border-slate-200"
+                >
+                  <img
+                    src={shipment.package_photo_url || sortedCheckpoints.find((cp) => cp.photo_url)?.photo_url || ''}
+                    alt="Package Condition"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end justify-between p-4">
+                    <span className="text-white text-xs font-mono font-semibold flex items-center">
+                      <Camera className="h-4 w-4 mr-1 text-emerald-400" />
+                      Attached by Courier / Facility Scan
+                    </span>
+                    <span className="bg-white/20 backdrop-blur-md hover:bg-white/40 text-white text-xs font-bold px-3 py-1.5 rounded-lg flex items-center transition-colors">
+                      <Eye className="h-4 w-4 mr-1.5" /> Enlarge Photo
+                    </span>
+                  </div>
+                </div>
+              </FadeIn>
+            )}
+
+            {/* Advanced Package Metadata */}
             <FadeIn delay={0.4} direction="up" className="bg-gradient-to-br from-white to-blue-50/50 backdrop-blur-xl rounded-2xl shadow-sm border border-blue-100/60 p-6 md:p-8 hover:shadow-md transition-shadow">
               <h3 className="text-xl font-bold text-slate-900 mb-6 border-b border-blue-100 pb-4 flex items-center">
                 <Package className="h-5 w-5 text-blue-600 mr-2" />
@@ -258,7 +297,6 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
 
           {/* Timeline Column - Dark Mode */}
           <FadeIn delay={0.3} direction="left" className="bg-slate-900 rounded-2xl shadow-xl border border-slate-800 p-6 relative overflow-hidden">
-            {/* Subtle background glow */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none"></div>
 
             <h3 className="text-xl font-bold text-white mb-6 flex items-center border-b border-slate-800 pb-4 relative z-10">
@@ -281,19 +319,31 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
                         transition={{ delay: idx * 0.1, type: 'spring', stiffness: 100 }}
                         className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active"
                       >
-                        {/* Icon - Glowing Radar if latest */}
                         <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-slate-900 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10 relative ${isLatest ? 'bg-blue-500 text-white' : 'bg-slate-800 text-slate-400'}`}>
                           {isLatest && (
                             <span className="absolute inset-0 rounded-full bg-blue-500 animate-ping opacity-75"></span>
                           )}
                           <MapPin className="h-4 w-4 relative z-10" />
                         </div>
-                        {/* Card */}
                         <motion.div whileHover={{ scale: 1.02 }} className={`w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border shadow-sm hover:shadow-md transition-shadow backdrop-blur-md ${isLatest ? 'bg-blue-900/40 border-blue-500/30' : 'bg-slate-800/50 border-slate-700/50'}`}>
                           <div className="flex justify-between items-start mb-1">
                             <h4 className={`font-bold ${isLatest ? 'text-white' : 'text-slate-200'}`}>{cp.status}</h4>
                           </div>
                           <p className={`text-sm mb-2 ${isLatest ? 'text-blue-200' : 'text-slate-400'}`}>{cp.status_description}</p>
+                          
+                          {/* Checkpoint Photo Thumbnail */}
+                          {cp.photo_url && (
+                            <div 
+                              onClick={() => setLightboxImage(cp.photo_url!)}
+                              className="my-2 relative h-32 w-full rounded-lg overflow-hidden border border-slate-700 cursor-pointer group/img"
+                            >
+                              <img src={cp.photo_url} alt="Milestone Photo" className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-300" />
+                              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+                                <Eye className="h-4 w-4 mr-1" /> View Photo
+                              </div>
+                            </div>
+                          )}
+
                           <div className={`flex items-center justify-between text-xs font-medium ${isLatest ? 'text-blue-300' : 'text-slate-500'}`}>
                             <span>{cp.location_name}</span>
                             <span>{new Date(cp.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -310,6 +360,16 @@ export default function TrackingPage({ params }: { params: { trackingNumber: str
 
       </FadeIn>
       
+      {/* Lightbox Viewer */}
+      <ImageLightbox
+        isOpen={!!lightboxImage}
+        src={lightboxImage}
+        onClose={() => setLightboxImage(null)}
+      />
+
+      {/* Live Support Chat Widget */}
+      <LiveChatWidget trackingNumber={shipment.tracking_number} shipmentId={shipment.id} />
+
       {/* Hidden container for PDF rendering */}
       <div className="overflow-hidden h-0 w-0 absolute top-[-9999px] left-[-9999px]">
         {shipment && <InvoiceTemplate ref={receiptRef} shipment={shipment} />}

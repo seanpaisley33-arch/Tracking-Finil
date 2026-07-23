@@ -396,7 +396,7 @@ export default function Home() {
           <div>
             <h4 className="font-bold text-white mb-4">Company</h4>
             <ul className="space-y-2 text-sm">
-              <li><a href="/admin/login" className="hover:text-white transition-colors">Admin Portal</a></li>
+              <li><a href="#" className="hover:text-white transition-colors">About Us</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
               <li><a href="#" className="hover:text-white transition-colors">Contact Support</a></li>

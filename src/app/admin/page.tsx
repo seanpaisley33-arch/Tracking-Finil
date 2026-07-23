@@ -1,12 +1,10 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Papa from 'papaparse';
-import { PackagePlus, UploadCloud, ListChecks, QrCode, LogOut, MapPin, Copy, FileText, Printer, Check, Stamp, ArrowLeft } from 'lucide-react';
+import { PackagePlus, UploadCloud, ListChecks, QrCode, LogOut, MapPin, Copy, FileText, Printer, Check, Stamp, ArrowLeft, MessageSquare, Camera, Upload } from 'lucide-react';
 import Link from 'next/link';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -16,6 +14,7 @@ import nextDynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import CustomInvoiceGenerator from '@/components/admin/CustomInvoiceGenerator';
 import ReceiptControl from '@/components/admin/ReceiptControl';
+import AdminChatDesk from '@/components/admin/AdminChatDesk';
 
 const AdminMiniMap = nextDynamic(() => import('@/components/AdminMiniMap'), {
   ssr: false,
@@ -23,8 +22,10 @@ const AdminMiniMap = nextDynamic(() => import('@/components/AdminMiniMap'), {
 });
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState<'create' | 'registry' | 'bulk' | 'status' | 'barcode' | 'invoice' | 'receipt'>('create');
+  const [activeTab, setActiveTab] = useState<'create' | 'registry' | 'bulk' | 'status' | 'barcode' | 'invoice' | 'receipt' | 'chat'>('create');
   const [session, setSession] = useState<any>(null);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [activeToast, setActiveToast] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -37,15 +38,95 @@ export default function AdminDashboard() {
     });
   }, [router]);
 
+  useEffect(() => {
+    const fetchUnread = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('chat_messages')
+          .select('*')
+          .eq('sender_type', 'user')
+          .neq('status', 'read');
+
+        if (!error && data) {
+          setUnreadCount(data.length);
+        }
+      } catch (err) {}
+    };
+
+    fetchUnread();
+
+    if (activeTab !== 'chat') {
+      const channel = supabase.channel('admin_nav_notifications');
+
+      channel
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'chat_messages' },
+          (payload) => {
+            const newMsg = payload.new as any;
+            if (newMsg && newMsg.sender_type === 'user') {
+              setUnreadCount((prev) => prev + 1);
+              setActiveToast(newMsg);
+              setTimeout(() => setActiveToast(null), 8000);
+            }
+          }
+        )
+        .on('broadcast', { event: 'chat_message' }, ({ payload }) => {
+          if (payload && payload.sender_type === 'user') {
+            setUnreadCount((prev) => prev + 1);
+            setActiveToast(payload);
+            setTimeout(() => setActiveToast(null), 8000);
+          }
+        })
+        .on('broadcast', { event: 'chat_read' }, () => {
+          setUnreadCount(0);
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [activeTab]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/admin/login');
   };
 
+  const handleOpenChat = () => {
+    setActiveTab('chat');
+    setUnreadCount(0);
+    setActiveToast(null);
+  };
+
   if (!session) return null;
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-slate-50 flex flex-col md:flex-row">
+    <div className="min-h-[calc(100vh-4rem)] bg-slate-50 flex flex-col md:flex-row relative">
+      {/* Realtime Admin Toast Pop-up */}
+      {activeToast && activeTab !== 'chat' && (
+        <div
+          onClick={handleOpenChat}
+          className="fixed top-5 right-5 z-50 bg-slate-900 text-white p-4 rounded-xl shadow-2xl border border-slate-700 cursor-pointer flex items-center gap-4 animate-bounce max-w-sm"
+        >
+          <div className="bg-blue-600 p-2.5 rounded-full text-white">
+            <MessageSquare className="w-5 h-5" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold text-blue-400">New Customer Message</p>
+              <span className="text-[10px] text-slate-400">
+                {activeToast.tracking_number || 'General Query'}
+              </span>
+            </div>
+            <p className="text-sm font-semibold truncate text-white mt-0.5">
+              {activeToast.content || 'New attachment received'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
       <aside className="w-full md:w-64 bg-white/80 backdrop-blur-xl border-r border-slate-200/60 flex flex-col shadow-sm z-10 relative">
         <div className="p-4 md:p-6 border-b border-slate-100 md:border-none">
@@ -53,6 +134,29 @@ export default function AdminDashboard() {
           <p className="text-sm text-slate-500">{session.user.email}</p>
         </div>
         <nav className="flex-1 px-4 py-2 md:py-0 flex flex-row md:flex-col gap-2 overflow-x-auto scrollbar-hide md:space-y-2">
+          <button
+            onClick={handleOpenChat}
+            className={`flex-shrink-0 flex items-center justify-between px-4 py-2 md:py-3 rounded-lg font-medium transition-colors relative ${
+              activeTab === 'chat' ? 'bg-blue-600 text-white shadow-md' : 'text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <MessageSquare className="h-5 w-5" />
+                <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-400 border border-white animate-pulse"></span>
+              </div>
+              <span className="text-sm md:text-base font-bold">Live Support Desk</span>
+            </div>
+            {unreadCount > 0 ? (
+              <span className="ml-2 bg-red-500 text-white text-[11px] font-black px-2 py-0.5 rounded-full shadow animate-bounce">
+                {unreadCount} NEW
+              </span>
+            ) : (
+              <span className="ml-2 text-[10px] bg-emerald-500/20 text-emerald-600 font-mono px-1.5 py-0.5 rounded border border-emerald-400/30">
+                LIVE
+              </span>
+            )}
+          </button>
           <button onClick={() => setActiveTab('create')} className={`flex-shrink-0 flex items-center space-x-2 md:space-x-3 px-4 py-2 md:py-3 rounded-lg font-medium transition-colors ${activeTab === 'create' ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50'}`}>
             <PackagePlus className="h-5 w-5" />
             <span className="text-sm md:text-base">Manual Create</span>
@@ -104,6 +208,7 @@ export default function AdminDashboard() {
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
+            {activeTab === 'chat' && <AdminChatDesk />}
             {activeTab === 'create' && <ManualCreateForm />}
             {activeTab === 'registry' && <ShipmentRegistry />}
             {activeTab === 'bulk' && <BulkIngestionWorker />}
@@ -308,6 +413,18 @@ function BulkStatusEngine() {
   });
   const [result, setResult] = useState('');
 
+  const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setPhotoUrl(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleUpdate = async () => {
     setResult('Updating...');
     const tns = trackingNumbers.split(/[,\n ]+/).map(t => t.trim()).filter(Boolean);
@@ -330,20 +447,36 @@ function BulkStatusEngine() {
         location_name: checkpoint.location_name,
         latitude: parseFloat(checkpoint.latitude) || null,
         longitude: parseFloat(checkpoint.longitude) || null,
+        photo_url: photoUrl || null,
         ...(checkpoint.created_at ? { created_at: new Date(checkpoint.created_at).toISOString() } : {})
       }));
 
-      // 3. Insert checkpoints
-      const { error: insertErr } = await supabase.from('shipment_checkpoints').insert(newCheckpoints);
-      if (insertErr) throw insertErr;
-
-      // 4. Update shipment current status
-      for (const s of shipments) {
-        await supabase.from('shipments').update({ current_status: checkpoint.status }).eq('id', s.id);
+      // 3. Insert checkpoints (with fallback if photo_url column is missing)
+      let { error: insertErr } = await supabase.from('shipment_checkpoints').insert(newCheckpoints);
+      
+      if (insertErr && photoUrl) {
+        // Fallback without photo_url column
+        const fallbackCheckpoints = newCheckpoints.map(({ photo_url, ...rest }) => rest);
+        const fallbackRes = await supabase.from('shipment_checkpoints').insert(fallbackCheckpoints);
+        if (fallbackRes.error) throw fallbackRes.error;
+      } else if (insertErr) {
+        throw insertErr;
       }
 
-      setResult(`Successfully updated ${shipments.length} shipments.`);
+      // 4. Update shipment current status & package photo
+      for (const s of shipments) {
+        const updatePayload: any = { current_status: checkpoint.status };
+        if (photoUrl) updatePayload.package_photo_url = photoUrl;
+        try {
+          await supabase.from('shipments').update(updatePayload).eq('id', s.id);
+        } catch (e) {
+          await supabase.from('shipments').update({ current_status: checkpoint.status }).eq('id', s.id);
+        }
+      }
+
+      setResult(`Successfully updated ${shipments.length} shipments with photo & status.`);
       setTrackingNumbers('');
+      setPhotoUrl(null);
     } catch (err: any) {
       setResult(`Error: ${err.message}`);
     }
@@ -411,8 +544,24 @@ function BulkStatusEngine() {
             <label className="block text-sm font-medium text-slate-700 mb-1">Custom Date & Time (Leave blank for current time)</label>
             <input type="datetime-local" value={checkpoint.created_at} onChange={e => setCheckpoint({...checkpoint, created_at: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg" />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Package Update Photo (Optional)</label>
+            <div className="flex items-center space-x-3">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoSelect}
+                className="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+              {photoUrl && (
+                <div className="relative h-12 w-12 rounded-lg overflow-hidden border border-blue-400 shrink-0">
+                  <img src={photoUrl} alt="Preview" className="h-full w-full object-cover" />
+                </div>
+              )}
+            </div>
+          </div>
           <button onClick={handleUpdate} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors mt-4">
-            Apply Status Update
+            Apply Status Update & Attach Photo
           </button>
           {result && <div className="mt-2 text-sm font-medium text-slate-700 bg-slate-100 p-3 rounded">{result}</div>}
           </div>
